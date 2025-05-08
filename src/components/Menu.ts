@@ -9,7 +9,6 @@ export class Menu extends PIXI.Container {
         { text: 'Magic Words', scene: 'magic-words' },
         { text: 'Phoenix Flame', scene: 'phoenix-flame' }
     ];
-    private background: PIXI.Graphics;
     private buttons: Button[] = [];
 
     constructor(game: Game) {

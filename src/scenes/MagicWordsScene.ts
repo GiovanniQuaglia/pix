@@ -463,7 +463,7 @@ export class MagicWordsScene extends Scene {
         this.animateText(text, emojis);
     }
 
-    public update(delta: number): void {
+    public update(): void {
         if (this.isLoading) return;
         
         if (this.isAnimating && this.dialogueData) {

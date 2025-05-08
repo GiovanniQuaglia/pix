@@ -81,7 +81,7 @@ export class AceOfShadowsScene extends Scene {
         super.destroy({ children: true });
     }
 
-    public update(delta: number): void {
+    public update(): void {
         if (!this.parent) return;
 
         const currentTime = Date.now();
