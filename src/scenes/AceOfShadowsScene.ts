@@ -20,11 +20,11 @@ export class AceOfShadowsScene extends Scene {
         endY: number;
         startTime: number;
     } | null = null;
-    private tickerCallback: (delta: number) => void;
+    private tickerCallback: () => void;
 
     constructor(app: PIXI.Application) {
         super(app);
-        this.tickerCallback = (delta) => this.update(delta);
+        this.tickerCallback = () => this.update();
         this.initialize();
     }
 
