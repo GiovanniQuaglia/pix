@@ -108,7 +108,7 @@ export class MagicWordsScene extends Scene {
             this.showCurrentLine();
         } catch (error) {
             console.error('Failed to fetch dialogue data:', error);
-            const errorText = new PIXI.Text('Failed to load dialogue. Please try again later.', {
+            const errorText = new PIXI.Text('Failed to load dialogue.\nPlease try again later.', {
                 fontFamily: 'Arial',
                 fontSize: 24,
                 fill: 0xff0000,

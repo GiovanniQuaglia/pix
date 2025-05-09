@@ -13,9 +13,10 @@ export class PhoenixFlameScene extends Scene {
     private readonly MAX_PARTICLES = 10;
     private readonly PARTICLE_LIFETIME = 40;
     private readonly EMIT_INTERVAL = 80;
+    private readonly INITIAL_SPRITE_SCALE = 0.8;
     private emitInterval: number | null = null;
     private tickerCallback: (delta: number) => void;
-    private particleTexture!: PIXI.Texture;
+    private fireTextures: PIXI.Texture[] = [];
     private houseTexture: PIXI.Texture;
     private sunTexture: PIXI.Texture;
     private house!: PIXI.Sprite;
@@ -29,28 +30,36 @@ export class PhoenixFlameScene extends Scene {
     }
 
     private initialize(): void {
-        // Create particle texture
-        this.particleTexture = this.createParticleTexture();
+        // Load fire textures
+        this.fireTextures = [
+            PIXI.Texture.from('images/fire_1.png'),
+            PIXI.Texture.from('images/fire_2.png'),
+            PIXI.Texture.from('images/fire_3.png'),
+        ];
+
+        // Add error handling for texture loading
+        this.fireTextures.forEach((texture, index) => {
+            texture.baseTexture.on('error', () => {
+                console.error(`Failed to load fire texture ${index + 1}`);
+            });
+        });
 
         // Add house sprite
         this.house = new PIXI.Sprite(this.houseTexture);
         this.house.anchor.set(0.5, 1); // Anchor at bottom center
         this.house.position.set(this.app.screen.width / 2, this.app.screen.height);
-        this.house.scale.set(1); // Doubled from 0.5 to 1
+        this.house.scale.set(1);
         this.addChild(this.house);
 
         // Add sun sprite
         const sun = new PIXI.Sprite(this.sunTexture);
         sun.anchor.set(0.5);
-        sun.position.set(this.app.screen.width - 200, 200); // Position in top-right area
-        sun.scale.set(0.8); // Doubled from 0.4 to 0.8
+        sun.position.set(this.app.screen.width - 200, 200);
+        sun.scale.set(0.8);
         this.addChild(sun);
 
         // Start particle emission
-        this.emitInterval = window.setInterval(
-            () => this.emitParticle(this.particleTexture),
-            this.EMIT_INTERVAL
-        );
+        this.emitInterval = window.setInterval(() => this.emitParticle(), this.EMIT_INTERVAL);
 
         // Add update loop
         this.app.ticker.add(this.tickerCallback);
@@ -78,45 +87,40 @@ export class PhoenixFlameScene extends Scene {
         super.destroy({ children: true });
     }
 
-    private createParticleTexture(): PIXI.Texture {
-        const graphics = new PIXI.Graphics();
-        graphics.beginFill(0xffffff);
-        graphics.drawCircle(0, 0, 50);
-        graphics.endFill();
-
-        // Create texture from graphics
-        return this.app.renderer.generateTexture(graphics);
-    }
-
     private initializeParticle(sprite: PIXI.Sprite): { x: number; y: number } {
         // Set position at the top of the house
         const houseTop = this.house.y - this.house.height;
         sprite.position.set(this.house.x, houseTop);
 
         // Set velocity with more concentrated upward movement
-        const angle = -Math.PI + Math.random() * Math.PI; // Mostly upward with small spread
-        const speed = 1 + Math.random(); // Reduced speed range
+        const angle = -Math.PI + Math.random() * Math.PI;
+        const speed = 0.2 + Math.random();
         const velocity = {
             x: Math.cos(angle) * speed,
             y: Math.sin(angle) * speed,
         };
 
-        // Set color
-        const hue = 20 + Math.random() * 20;
-        const saturation = 80 + Math.random() * 20;
-        const lightness = 50 + Math.random() * 20;
-        sprite.tint = this.hslToHex(hue, saturation, lightness);
+        // Set random fire texture
+        const randomTexture =
+            this.fireTextures[Math.floor(Math.random() * this.fireTextures.length)];
+        sprite.texture = randomTexture;
+
+        // Set a fixed scale
+        sprite.scale.set(this.INITIAL_SPRITE_SCALE);
+
+        // Set transparency
+        sprite.alpha = 0.8;
 
         return velocity;
     }
 
-    private emitParticle(texture: PIXI.Texture): void {
+    private emitParticle(): void {
         if (!this.parent) return; // Skip if scene is being destroyed
         if (this.particles.length >= this.MAX_PARTICLES) {
             return;
         }
 
-        const sprite = new PIXI.Sprite(texture);
+        const sprite = new PIXI.Sprite(this.fireTextures[0]); // Initial texture, will be changed in initializeParticle
         sprite.anchor.set(0.5);
         const velocity = this.initializeParticle(sprite);
 
@@ -142,8 +146,6 @@ export class PhoenixFlameScene extends Scene {
                 // Reset particle to starting values
                 particle.velocity = this.initializeParticle(particle.sprite);
                 particle.life = 0;
-                particle.sprite.alpha = 1;
-                particle.sprite.scale.set(1);
                 continue;
             }
 
@@ -154,56 +156,12 @@ export class PhoenixFlameScene extends Scene {
             );
 
             // Add some upward drift
-            particle.velocity.y -= 0.05;
+            particle.velocity.y -= 0.025;
 
-            // Fade out
+            // Progressively reduce scale
             const lifeRatio = particle.life / particle.maxLife;
-            particle.sprite.alpha = 1 - lifeRatio;
-            particle.sprite.scale.set(1 - lifeRatio * 0.5);
+            const newScale = this.INITIAL_SPRITE_SCALE * (1 - lifeRatio * 0.7); // Reduce to 30% of original size
+            particle.sprite.scale.set(newScale);
         }
-    }
-
-    private hslToHex(h: number, s: number, l: number): number {
-        s /= 100;
-        l /= 100;
-
-        const c = (1 - Math.abs(2 * l - 1)) * s;
-        const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-        const m = l - c / 2;
-        let r = 0,
-            g = 0,
-            b = 0;
-
-        if (0 <= h && h < 60) {
-            r = c;
-            g = x;
-            b = 0;
-        } else if (60 <= h && h < 120) {
-            r = x;
-            g = c;
-            b = 0;
-        } else if (120 <= h && h < 180) {
-            r = 0;
-            g = c;
-            b = x;
-        } else if (180 <= h && h < 240) {
-            r = 0;
-            g = x;
-            b = c;
-        } else if (240 <= h && h < 300) {
-            r = x;
-            g = 0;
-            b = c;
-        } else if (300 <= h && h < 360) {
-            r = c;
-            g = 0;
-            b = x;
-        }
-
-        r = Math.round((r + m) * 255);
-        g = Math.round((g + m) * 255);
-        b = Math.round((b + m) * 255);
-
-        return (r << 16) + (g << 8) + b;
     }
 }
