@@ -203,23 +203,40 @@ export class MagicWordsScene extends Scene {
         }
     }
 
-    private isValidDialogueData(data: any): data is DialogueData {
+    private isValidDialogueData(data: unknown): data is DialogueData {
+        if (!data || typeof data !== 'object') return false;
+        
+        const d = data as Record<string, unknown>;
+        
+        if (!Array.isArray(d.dialogue) || !Array.isArray(d.emojies) || !Array.isArray(d.avatars)) {
+            return false;
+        }
+
         return (
-            data &&
-            Array.isArray(data.dialogue) &&
-            Array.isArray(data.emojies) &&
-            Array.isArray(data.avatars) &&
-            data.dialogue.every(
-                (line: any) => typeof line.name === 'string' && typeof line.text === 'string'
+            d.dialogue.every(
+                (line: unknown) => {
+                    if (typeof line !== 'object' || !line) return false;
+                    const l = line as Record<string, unknown>;
+                    return typeof l.name === 'string' && typeof l.text === 'string';
+                }
             ) &&
-            data.emojies.every(
-                (emoji: any) => typeof emoji.name === 'string' && typeof emoji.url === 'string'
+            d.emojies.every(
+                (emoji: unknown) => {
+                    if (typeof emoji !== 'object' || !emoji) return false;
+                    const e = emoji as Record<string, unknown>;
+                    return typeof e.name === 'string' && typeof e.url === 'string';
+                }
             ) &&
-            data.avatars.every(
-                (avatar: any) =>
-                    typeof avatar.name === 'string' &&
-                    typeof avatar.url === 'string' &&
-                    (avatar.position === 'left' || avatar.position === 'right')
+            d.avatars.every(
+                (avatar: unknown) => {
+                    if (typeof avatar !== 'object' || !avatar) return false;
+                    const a = avatar as Record<string, unknown>;
+                    return (
+                        typeof a.name === 'string' &&
+                        typeof a.url === 'string' &&
+                        (a.position === 'left' || a.position === 'right')
+                    );
+                }
             )
         );
     }
