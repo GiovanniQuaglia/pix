@@ -6,12 +6,15 @@ export class AceOfShadowsScene extends Scene {
     private stacks: PIXI.Container[] = [];
     private readonly NUM_CARDS = 144;
     private readonly NUM_STACKS = 2;
-    private readonly CARD_OFFSET = 2;
+    private readonly CARD_OFFSET = 4;
     private readonly ANIMATION_DURATION = 2000;
     private readonly MOVE_INTERVAL = 1000;
     private movingToSecondStack = true;
     private lastMoveTime = 0;
     private isAnimating = false;
+    private cardTexture: PIXI.Texture;
+    private chip50Texture: PIXI.Texture;
+    private chip100Texture: PIXI.Texture;
     private currentAnimation: {
         card: PIXI.Sprite;
         startX: number;
@@ -25,6 +28,9 @@ export class AceOfShadowsScene extends Scene {
     constructor(app: PIXI.Application) {
         super(app);
         this.tickerCallback = () => this.update();
+        this.cardTexture = PIXI.Texture.from('images/card.png');
+        this.chip50Texture = PIXI.Texture.from('images/chip_50.png');
+        this.chip100Texture = PIXI.Texture.from('images/chip_100.png');
         this.initialize();
     }
 
@@ -43,12 +49,14 @@ export class AceOfShadowsScene extends Scene {
 
             // Responsive spacing based on screen width
             const isMobile = this.app.screen.width <= 768;
-            const cardWidth = isMobile ? 80 : 100;
+            const cardWidth = isMobile ? 110 : 100;
             const stackSpacing = Math.min(this.app.screen.width * 0.3, 200);
 
             const verticalOffset = (this.NUM_CARDS * this.CARD_OFFSET) / 2;
 
-            const startX = this.app.screen.width / 2 - cardWidth;
+            // Center the stacks by adjusting the startX calculation
+
+            const startX = (this.app.screen.width - stackSpacing) / 2;
             stack.position.set(
                 startX + i * stackSpacing,
                 this.app.screen.height / 2 - verticalOffset
@@ -57,14 +65,35 @@ export class AceOfShadowsScene extends Scene {
             this.addChild(stack);
         }
 
+        // Add chip sprites
+        const isMobile = this.app.screen.width <= 768;
+        if (!isMobile) {
+            const chip50 = new PIXI.Sprite(this.chip50Texture);
+            const chip100 = new PIXI.Sprite(this.chip100Texture);
+            
+            // Position chips on either side of the stacks
+            const chipY = this.app.screen.height / 2;
+            const chipSpacing = Math.min(this.app.screen.width * 0.6, 300);
+            
+            chip50.anchor.set(0.5);
+            chip50.position.set(this.app.screen.width / 2 - chipSpacing, chipY + 40);
+            chip50.scale.set(0.5); // Adjust scale as needed
+            
+            chip100.anchor.set(0.5);
+            chip100.position.set(this.app.screen.width / 2 + chipSpacing, chipY - 50);
+            chip100.scale.set(0.5); // Adjust scale as needed
+            
+            this.addChild(chip50);
+            this.addChild(chip100);
+        }
+
         // Create cards
         for (let i = 0; i < this.NUM_CARDS; i++) {
-            const card = new PIXI.Sprite(PIXI.Texture.WHITE);
+            const card = new PIXI.Sprite(this.cardTexture);
 
             const isMobile = this.app.screen.width <= 768;
-            card.width = isMobile ? 80 : 100;
-            card.height = isMobile ? 120 : 150;
-            card.tint = Math.random() * 0xffffff;
+            card.width = isMobile ? 110 : 100;
+            card.height = isMobile ? 170 : 150;
             card.anchor.set(0.5, 0.5);
             card.position.set(0, i * this.CARD_OFFSET);
             this.cards.push(card);
