@@ -11,10 +11,11 @@ interface Particle {
 export class PhoenixFlameScene extends Scene {
     private particles: Particle[] = [];
     private readonly MAX_PARTICLES = 10;
-    private readonly PARTICLE_LIFETIME = 2000; // 2 seconds
-    private readonly EMIT_INTERVAL = 200; // 200ms between emissions
+    private readonly PARTICLE_LIFETIME = 40;
+    private readonly EMIT_INTERVAL = 80;
     private emitInterval: number | null = null;
     private tickerCallback: (delta: number) => void;
+    private particleTexture!: PIXI.Texture;
 
     constructor(app: PIXI.Application) {
         super(app);
@@ -24,10 +25,10 @@ export class PhoenixFlameScene extends Scene {
 
     private initialize(): void {
         // Create particle texture
-        const particleTexture = this.createParticleTexture();
-        
+        this.particleTexture = this.createParticleTexture();
+
         // Start particle emission
-        this.emitInterval = window.setInterval(() => this.emitParticle(particleTexture), this.EMIT_INTERVAL);
+        this.emitInterval = window.setInterval(() => this.emitParticle(this.particleTexture), this.EMIT_INTERVAL);
 
         // Add update loop
         this.app.ticker.add(this.tickerCallback);
@@ -58,11 +59,35 @@ export class PhoenixFlameScene extends Scene {
     private createParticleTexture(): PIXI.Texture {
         const graphics = new PIXI.Graphics();
         graphics.beginFill(0xFFFFFF);
-        graphics.drawCircle(0, 0, 10);
+        graphics.drawCircle(0, 0, 50);
         graphics.endFill();
 
         // Create texture from graphics
         return this.app.renderer.generateTexture(graphics);
+    }
+
+    private initializeParticle(sprite: PIXI.Sprite): { x: number; y: number } {
+        // Set position
+        sprite.position.set(
+            this.app.screen.width / 2,
+            this.app.screen.height / 2
+        );
+
+        // Set velocity with more concentrated upward movement
+        const angle = -Math.PI + (Math.random()) * Math.PI; // Mostly upward with small spread
+        const speed = 1+ Math.random(); // Reduced speed range
+        const velocity = {
+            x: Math.cos(angle) * speed,
+            y: Math.sin(angle) * speed
+        };
+
+        // Set color
+        const hue = 20 + Math.random() * 20;
+        const saturation = 80 + Math.random() * 20;
+        const lightness = 50 + Math.random() * 20;
+        sprite.tint = this.hslToHex(hue, saturation, lightness);
+
+        return velocity;
     }
 
     private emitParticle(texture: PIXI.Texture): void {
@@ -73,24 +98,7 @@ export class PhoenixFlameScene extends Scene {
 
         const sprite = new PIXI.Sprite(texture);
         sprite.anchor.set(0.5);
-        sprite.position.set(
-            this.app.screen.width / 2,
-            this.app.screen.height / 2
-        );
-
-        // Random initial velocity
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 2 + Math.random() * 2;
-        const velocity = {
-            x: Math.cos(angle) * speed,
-            y: Math.sin(angle) * speed
-        };
-
-        // Random color between red and orange
-        const hue = 20 + Math.random() * 20; // 20-40 degrees (red-orange)
-        const saturation = 80 + Math.random() * 20; // 80-100%
-        const lightness = 50 + Math.random() * 20; // 50-70%
-        sprite.tint = this.hslToHex(hue, saturation, lightness);
+        const velocity = this.initializeParticle(sprite);
 
         const particle: Particle = {
             sprite,
@@ -111,11 +119,11 @@ export class PhoenixFlameScene extends Scene {
             particle.life += delta;
 
             if (particle.life >= particle.maxLife) {
-                if (particle.sprite.parent) {
-                    particle.sprite.parent.removeChild(particle.sprite);
-                }
-                particle.sprite.destroy();
-                this.particles.splice(i, 1);
+                // Reset particle to starting values
+                particle.velocity = this.initializeParticle(particle.sprite);
+                particle.life = 0;
+                particle.sprite.alpha = 1;
+                particle.sprite.scale.set(1);
                 continue;
             }
 
