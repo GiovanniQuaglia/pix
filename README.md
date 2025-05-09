@@ -28,8 +28,14 @@ npm run preview
 src/
 ├── main.ts           # Application entry point
 ├── Game.ts           # Main game class
+├── components/       # Reusable components
 └── scenes/           # Scene implementations
     ├── AceOfShadowsScene.ts
     ├── MagicWordsScene.ts
     └── PhoenixFlameScene.ts
 ```
+
+## Further improvements
+
+- Eventually create a sprite atlas for the images to improve performance
+- Investigate and fix the emoji positioning issue when text wraps to multiple lines
