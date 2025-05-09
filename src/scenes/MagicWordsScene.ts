@@ -644,4 +644,44 @@ export class MagicWordsScene extends Scene {
 
         super.destroy({ children: true });
     }
+
+    public handleResize(): void {
+        // Calculate positions based on screen dimensions
+        const isMobile = this.app.screen.width <= 768;
+        const boxWidth = isMobile ? this.app.screen.width * 0.95 : this.app.screen.width * 0.4;
+        const boxHeight = this.app.screen.height * 0.3;
+        const boxX = (this.app.screen.width - boxWidth) / 2;
+        const characterHeight = isMobile ? this.app.screen.width * 0.2 : this.app.screen.width * 0.1;
+        const boxY = this.app.screen.height - characterHeight - boxHeight - 60;
+
+        // Update white textbox
+        const box = this.children.find(child => child instanceof PIXI.Graphics) as PIXI.Graphics;
+        if (box) {
+            box.clear();
+            box.beginFill(0xffffff, 0.95);
+            box.drawRoundedRect(boxX, boxY, boxWidth, boxHeight, 15);
+            box.endFill();
+        }
+
+        // Update dialogue container position relative to the textbox
+        this.dialogueContainer.position.set(boxX + 20, boxY + 60);
+
+        // Update speaker name position relative to the textbox
+        this.speakerName.position.set(boxX + 20, boxY + 20);
+
+        // Update continue button position relative to the textbox
+        this.continueButton.position.set(boxX + boxWidth - 140, boxY + boxHeight - 60);
+
+        // Update restart button position relative to the textbox
+        this.restartButton.position.set(boxX + boxWidth - 140, boxY + boxHeight - 60);
+
+        // Update avatar position
+        if (this.currentAvatar) {
+            const horizontalOffset = this.app.screen.width * (isMobile ? 0.2 : 0.35);
+            const xPosition = this.currentAvatar.anchor.x === 0.5 ? 
+                horizontalOffset : 
+                this.app.screen.width - horizontalOffset;
+            this.currentAvatar.position.set(xPosition, this.app.screen.height);
+        }
+    }
 }

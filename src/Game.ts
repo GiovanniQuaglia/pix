@@ -9,6 +9,7 @@ import { Button } from './components/Button';
 // Define a base scene type
 interface GameScene extends PIXI.Container {
     cleanup?: () => void;
+    handleResize?: () => void;
 }
 
 const UI_CONFIG = {
@@ -133,6 +134,11 @@ export class Game {
 
         // Update menu layout if needed
         this.menu.updateLayout?.();
+
+        // Update current scene if it exists
+        if (this.currentScene && 'handleResize' in this.currentScene) {
+            (this.currentScene as any).handleResize();
+        }
     }
 
     public get application(): PIXI.Application {
