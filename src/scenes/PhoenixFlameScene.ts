@@ -93,7 +93,7 @@ export class PhoenixFlameScene extends Scene {
         sprite.position.set(this.house.x, houseTop);
 
         // Set velocity with more concentrated upward movement
-        const angle = -Math.PI + Math.random() * Math.PI;
+        const angle = Math.PI + Math.random() * Math.PI;
         const speed = 0.2 + Math.random();
         const velocity = {
             x: Math.cos(angle) * speed,
@@ -156,7 +156,7 @@ export class PhoenixFlameScene extends Scene {
             );
 
             // Add some upward drift
-            particle.velocity.y -= 0.025;
+            particle.velocity.y -= 0.4;
 
             // Progressively reduce scale
             const lifeRatio = particle.life / particle.maxLife;
