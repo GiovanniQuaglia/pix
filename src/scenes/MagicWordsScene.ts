@@ -651,7 +651,9 @@ export class MagicWordsScene extends Scene {
         const boxWidth = isMobile ? this.app.screen.width * 0.95 : this.app.screen.width * 0.4;
         const boxHeight = this.app.screen.height * 0.3;
         const boxX = (this.app.screen.width - boxWidth) / 2;
-        const characterHeight = isMobile ? this.app.screen.width * 0.2 : this.app.screen.width * 0.1;
+        const characterHeight = isMobile
+            ? this.app.screen.width * 0.2
+            : this.app.screen.width * 0.1;
         const boxY = this.app.screen.height - characterHeight - boxHeight - 60;
 
         // Update white textbox
@@ -678,9 +680,10 @@ export class MagicWordsScene extends Scene {
         // Update avatar position
         if (this.currentAvatar) {
             const horizontalOffset = this.app.screen.width * (isMobile ? 0.2 : 0.35);
-            const xPosition = this.currentAvatar.anchor.x === 0.5 ? 
-                horizontalOffset : 
-                this.app.screen.width - horizontalOffset;
+            const xPosition =
+                this.currentAvatar.anchor.x === 0.5
+                    ? horizontalOffset
+                    : this.app.screen.width - horizontalOffset;
             this.currentAvatar.position.set(xPosition, this.app.screen.height);
         }
     }

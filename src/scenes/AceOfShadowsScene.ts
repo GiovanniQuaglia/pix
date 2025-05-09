@@ -56,10 +56,7 @@ export class AceOfShadowsScene extends Scene {
 
             // Position stacks relative to center
             const offsetX = (i - (this.NUM_STACKS - 1) / 2) * stackSpacing;
-            stack.position.set(
-                centerX + offsetX,
-                centerY - verticalOffset
-            );
+            stack.position.set(centerX + offsetX, centerY - verticalOffset);
 
             this.stacks.push(stack);
             this.addChild(stack);
@@ -130,10 +127,7 @@ export class AceOfShadowsScene extends Scene {
         // Position stacks relative to center
         this.stacks.forEach((stack, i) => {
             const offsetX = (i - (this.NUM_STACKS - 1) / 2) * stackSpacing;
-            stack.position.set(
-                centerX + offsetX,
-                centerY - verticalOffset
-            );
+            stack.position.set(centerX + offsetX, centerY - verticalOffset);
         });
 
         // Update card sizes
@@ -145,7 +139,7 @@ export class AceOfShadowsScene extends Scene {
 
         // Update chip positions if they exist
         const chipSpacing = Math.min(this.app.screen.width * 0.6, 300);
-        
+
         // Find and update chip sprites
         this.children.forEach(child => {
             if (child instanceof PIXI.Sprite && child.texture === this.chip50Texture) {

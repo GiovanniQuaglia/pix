@@ -59,10 +59,7 @@ export class Game {
         // Create title with initial empty text
         this.title = new PIXI.Text('', UI_CONFIG.title.style);
         this.title.anchor.set(0.5);
-        this.title.position.set(
-            this.app.screen.width / 2,
-            this.app.screen.height / 2 - 200
-        );
+        this.title.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 200);
         this.uiLayer.addChild(this.title);
 
         // Wait for font to load before setting the text
@@ -115,10 +112,7 @@ export class Game {
 
     private handleResize(): void {
         // Update title position
-        this.title.position.set(
-            this.app.screen.width / 2,
-            this.app.screen.height / 2 - 150
-        );
+        this.title.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 150);
 
         // Update FPS counter position
         this.fpsText.position.set(
@@ -136,8 +130,8 @@ export class Game {
         this.menu.updateLayout?.();
 
         // Update current scene if it exists
-        if (this.currentScene && 'handleResize' in this.currentScene) {
-            (this.currentScene as any).handleResize();
+        if (this.currentScene && typeof this.currentScene.handleResize === 'function') {
+            this.currentScene.handleResize();
         }
     }
 
