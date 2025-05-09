@@ -38,4 +38,4 @@ src/
 ## Further improvements
 
 - Eventually create a sprite atlas for the images to improve performance
-- Investigate and fix the emoji positioning issue when text wraps to multiple lines
+- Improve emoji positioning and text newline 

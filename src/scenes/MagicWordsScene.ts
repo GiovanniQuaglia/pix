@@ -41,6 +41,12 @@ export class MagicWordsScene extends Scene {
     private currentAvatar: PIXI.Sprite | null = null;
     private loadingText: PIXI.Text;
     private isLoading: boolean = true;
+    private dialogueContainer: PIXI.Container;
+    private charSprites: PIXI.Text[] = [];
+    private readonly CHAR_SPACING = 1;
+    private readonly EMOJI_SPACING = -10;
+    private readonly LINE_HEIGHT = 32;
+    private readonly MAX_LINE_WIDTH = 380;
 
     constructor(app: PIXI.Application) {
         super(app);
@@ -72,6 +78,10 @@ export class MagicWordsScene extends Scene {
         this.loadingText.anchor.set(0.5);
         this.loadingText.position.set(this.app.screen.width / 2, this.app.screen.height / 2);
         this.addChild(this.loadingText);
+
+        // Initialize dialogue container
+        this.dialogueContainer = new PIXI.Container();
+        this.addChild(this.dialogueContainer);
 
         this.initialize();
     }
@@ -205,39 +215,33 @@ export class MagicWordsScene extends Scene {
 
     private isValidDialogueData(data: unknown): data is DialogueData {
         if (!data || typeof data !== 'object') return false;
-        
+
         const d = data as Record<string, unknown>;
-        
+
         if (!Array.isArray(d.dialogue) || !Array.isArray(d.emojies) || !Array.isArray(d.avatars)) {
             return false;
         }
 
         return (
-            d.dialogue.every(
-                (line: unknown) => {
-                    if (typeof line !== 'object' || !line) return false;
-                    const l = line as Record<string, unknown>;
-                    return typeof l.name === 'string' && typeof l.text === 'string';
-                }
-            ) &&
-            d.emojies.every(
-                (emoji: unknown) => {
-                    if (typeof emoji !== 'object' || !emoji) return false;
-                    const e = emoji as Record<string, unknown>;
-                    return typeof e.name === 'string' && typeof e.url === 'string';
-                }
-            ) &&
-            d.avatars.every(
-                (avatar: unknown) => {
-                    if (typeof avatar !== 'object' || !avatar) return false;
-                    const a = avatar as Record<string, unknown>;
-                    return (
-                        typeof a.name === 'string' &&
-                        typeof a.url === 'string' &&
-                        (a.position === 'left' || a.position === 'right')
-                    );
-                }
-            )
+            d.dialogue.every((line: unknown) => {
+                if (typeof line !== 'object' || !line) return false;
+                const l = line as Record<string, unknown>;
+                return typeof l.name === 'string' && typeof l.text === 'string';
+            }) &&
+            d.emojies.every((emoji: unknown) => {
+                if (typeof emoji !== 'object' || !emoji) return false;
+                const e = emoji as Record<string, unknown>;
+                return typeof e.name === 'string' && typeof e.url === 'string';
+            }) &&
+            d.avatars.every((avatar: unknown) => {
+                if (typeof avatar !== 'object' || !avatar) return false;
+                const a = avatar as Record<string, unknown>;
+                return (
+                    typeof a.name === 'string' &&
+                    typeof a.url === 'string' &&
+                    (a.position === 'left' || a.position === 'right')
+                );
+            })
         );
     }
 
@@ -269,17 +273,6 @@ export class MagicWordsScene extends Scene {
         this.speakerName.position.set(boxX + 20, boxY + 20);
         this.addChild(this.speakerName);
 
-        // Create dialogue text
-        this.dialogueText = new PIXI.Text('', {
-            fontFamily: 'Arial',
-            fontSize: 20,
-            fill: 0x333333,
-            wordWrap: true,
-            wordWrapWidth: boxWidth - 40,
-        });
-        this.dialogueText.position.set(boxX + 20, boxY + 60);
-        this.addChild(this.dialogueText);
-
         // Position continue button
         this.continueButton.position.set(boxX + boxWidth - 140, boxY + boxHeight - 60);
         this.continueButton.setVisible(false);
@@ -288,6 +281,10 @@ export class MagicWordsScene extends Scene {
         // Position restart button
         this.restartButton.position.set(boxX + boxWidth - 140, boxY + boxHeight - 60);
         this.addChild(this.restartButton);
+
+        // Position the dialogue container (added last to appear on top)
+        this.dialogueContainer.position.set(boxX + 20, boxY + 60);
+        this.addChild(this.dialogueContainer);
     }
 
     private updateAvatar(speakerName: string): void {
@@ -372,8 +369,8 @@ export class MagicWordsScene extends Scene {
 
         while ((match = emojiRegex.exec(text)) !== null) {
             const emojiName = match[1];
-            parsedText += text.slice(lastIndex, match.index) + '      '; // Add four spaces for emoji placement
-            emojis.push({ name: emojiName, index: parsedText.length - 2 }); // Position in middle of spaces
+            parsedText += text.slice(lastIndex, match.index) + '  '; // Just add two spaces
+            emojis.push({ name: emojiName, index: parsedText.length - 1 }); // Position at the end of spaces
             lastIndex = match.index + match[0].length;
         }
         parsedText += text.slice(lastIndex);
@@ -383,27 +380,17 @@ export class MagicWordsScene extends Scene {
 
     private animateText(text: string, emojis: { name: string; index: number }[]): void {
         let currentIndex = 0;
-        this.dialogueText.text = '';
+        this.clearDialogueContainer();
 
         const animate = () => {
             if (currentIndex < text.length) {
-                this.dialogueText.text += text[currentIndex];
-
-                // Check if we need to add an emoji
+                const currentChar = text[currentIndex];
                 const emojiToAdd = emojis.find(e => e.index === currentIndex);
+
                 if (emojiToAdd) {
-                    const emoji = this.dialogueData?.emojies.find(e => e.name === emojiToAdd.name);
-                    if (emoji?.texture) {
-                        const sprite = new PIXI.Sprite(emoji.texture);
-                        const textHeight = Number(this.dialogueText.style.fontSize || 20);
-                        sprite.scale.set((textHeight / Number(sprite.height)) * 1.2);
-                        sprite.position.set(
-                            this.dialogueText.x + this.dialogueText.width + 10, // More spacing
-                            this.dialogueText.y + textHeight / 2 - textHeight * 0.5 // Raise by 50% of text height
-                        );
-                        this.addChild(sprite);
-                        this.emojiSprites.set(emojiToAdd.name, sprite);
-                    }
+                    this.addEmoji(emojiToAdd.name);
+                } else {
+                    this.addCharacter(currentChar);
                 }
 
                 currentIndex++;
@@ -415,6 +402,112 @@ export class MagicWordsScene extends Scene {
         };
 
         animate();
+    }
+
+    private clearDialogueContainer(): void {
+        this.dialogueContainer.removeChildren();
+        this.charSprites = [];
+        this.emojiSprites.clear();
+    }
+
+    private addCharacter(char: string): void {
+        const charText = new PIXI.Text(char, {
+            fontFamily: 'Arial',
+            fontSize: 20,
+            fill: 0x333333,
+        });
+
+        const lastChar = this.charSprites[this.charSprites.length - 1];
+        let x = 0;
+        let y = 0;
+
+        if (lastChar) {
+            x = lastChar.x + lastChar.width + this.CHAR_SPACING;
+            y = lastChar.y;
+
+            // Check if we need to wrap to next line
+            if (x + charText.width > this.MAX_LINE_WIDTH) {
+                // If we're in the middle of a word (not a space), move the whole word to the next line
+                if (char !== ' ') {
+                    // Store the Y position before removing characters
+                    const currentY = lastChar.y;
+
+                    // Find the start of the current word
+                    let wordStartIndex = this.charSprites.length - 1;
+                    while (
+                        wordStartIndex > 0 &&
+                        this.charSprites[wordStartIndex - 1].text !== ' '
+                    ) {
+                        wordStartIndex--;
+                    }
+
+                    // Store the current word's characters
+                    const wordChars = this.charSprites.slice(wordStartIndex);
+                    const wordText = wordChars.map(c => c.text).join('');
+
+                    // Remove all characters of the current word
+                    for (let i = this.charSprites.length - 1; i >= wordStartIndex; i--) {
+                        const sprite = this.charSprites.pop();
+                        if (sprite) {
+                            sprite.destroy();
+                        }
+                    }
+
+                    // Move to new line
+                    x = 0;
+                    y = currentY + this.LINE_HEIGHT;
+
+                    // Add the word back at the new position
+                    const wordSprite = new PIXI.Text(wordText, {
+                        fontFamily: 'Arial',
+                        fontSize: 20,
+                        fill: 0x333333,
+                    });
+                    wordSprite.position.set(x, y);
+                    this.dialogueContainer.addChild(wordSprite);
+                    this.charSprites.push(wordSprite);
+                    x = wordSprite.width + this.CHAR_SPACING;
+                } else {
+                    x = 0;
+                    y = lastChar.y + this.LINE_HEIGHT;
+                }
+            }
+        }
+
+        charText.position.set(x, y);
+        this.dialogueContainer.addChild(charText);
+        this.charSprites.push(charText);
+    }
+
+    private addEmoji(emojiName: string): void {
+        const emoji = this.dialogueData?.emojies.find(e => e.name === emojiName);
+        if (!emoji?.texture) return;
+
+        const sprite = new PIXI.Sprite(emoji.texture);
+        const textHeight = 20; // Match font size
+        sprite.scale.set((textHeight / sprite.height) * 1.2);
+
+        const lastChar = this.charSprites[this.charSprites.length - 1];
+        let x = 0;
+        let y = 0;
+
+        if (lastChar) {
+            x = lastChar.x + lastChar.width + this.EMOJI_SPACING;
+            y = lastChar.y;
+
+            // Check if we need to wrap to next line
+            if (x + sprite.width > this.MAX_LINE_WIDTH) {
+                x = 0;
+                y = lastChar.y + this.LINE_HEIGHT;
+            }
+        }
+
+        sprite.position.set(x, y + (this.LINE_HEIGHT - sprite.height) / 2);
+        this.dialogueContainer.addChild(sprite);
+        this.emojiSprites.set(emojiName, sprite);
+
+        // Add a space after the emoji
+        this.addCharacter(' ');
     }
 
     private onContinueClick(): void {
