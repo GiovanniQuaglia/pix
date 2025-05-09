@@ -17,12 +17,12 @@ const UI_CONFIG = {
             fontSize: 16,
             fill: 0x333333,
         }),
-        position: { x: 10, y: 10 }
+        position: { x: 10, y: 10 },
     },
     backButton: {
         position: { x: 20, y: 20 },
-        size: { width: 100, height: 40 }
-    }
+        size: { width: 100, height: 40 },
+    },
 };
 
 export class Game {
@@ -36,30 +36,36 @@ export class Game {
     private scenes: Record<string, () => GameScene> = {
         'ace-of-shadows': () => new AceOfShadowsScene(this.app),
         'magic-words': () => new MagicWordsScene(this.app),
-        'phoenix-flame': () => new PhoenixFlameScene(this.app)
+        'phoenix-flame': () => new PhoenixFlameScene(this.app),
     };
 
     constructor(app: PIXI.Application) {
         this.app = app;
-        
+
         // Create UI layer
         this.uiLayer = new PIXI.Container();
-        
+
         // Create back button using Button component
         this.backButton = new Button(app, '← Back', () => this.showMenu(), {
             width: UI_CONFIG.backButton.size.width,
             height: UI_CONFIG.backButton.size.height,
-            backgroundColor: 0x337EA9,
-            textColor: 0xFFFFFF,
-            fontSize: 20
+            backgroundColor: 0x337ea9,
+            textColor: 0xffffff,
+            fontSize: 20,
         });
-        this.backButton.position.set(UI_CONFIG.backButton.position.x, UI_CONFIG.backButton.position.y);
+        this.backButton.position.set(
+            UI_CONFIG.backButton.position.x,
+            UI_CONFIG.backButton.position.y
+        );
         this.backButton.setVisible(false);
 
         // Add FPS counter
         this.fpsText = new PIXI.Text('FPS: 0', UI_CONFIG.fpsCounter.style);
         this.fpsText.anchor.set(1, 0);
-        this.fpsText.position.set(app.screen.width - UI_CONFIG.fpsCounter.position.x, UI_CONFIG.fpsCounter.position.y);
+        this.fpsText.position.set(
+            app.screen.width - UI_CONFIG.fpsCounter.position.x,
+            UI_CONFIG.fpsCounter.position.y
+        );
 
         // Add UI elements to layer
         this.uiLayer.addChild(this.backButton);
@@ -67,7 +73,7 @@ export class Game {
 
         // Create menu
         this.menu = new Menu(this);
-        
+
         // Add everything to stage in correct order
         this.app.stage.addChild(this.menu);
         this.app.stage.addChild(this.uiLayer);
@@ -130,10 +136,10 @@ export class Game {
             // Create new scene
             this.currentScene = this.scenes[sceneName]();
             this.app.stage.addChild(this.currentScene);
-            
+
             // Ensure UI layer is always on top
             this.app.stage.setChildIndex(this.uiLayer, this.app.stage.children.length - 1);
-            
+
             this.menu.visible = false;
             this.backButton.setVisible(true);
         } catch (error) {
@@ -153,7 +159,7 @@ export class Game {
         }
         this.menu.visible = true;
         this.backButton.setVisible(false);
-        
+
         // Ensure UI layer is always on top
         this.app.stage.setChildIndex(this.uiLayer, this.app.stage.children.length - 1);
     }
@@ -175,4 +181,4 @@ export class Game {
         // Remove event listeners
         window.removeEventListener('resize', this.resizeHandler);
     }
-} 
+}

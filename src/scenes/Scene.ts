@@ -9,4 +9,4 @@ export abstract class Scene extends PIXI.Container {
     }
 
     public abstract update(delta: number): void;
-} 
+}

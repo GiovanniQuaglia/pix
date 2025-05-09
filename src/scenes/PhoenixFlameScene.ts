@@ -19,7 +19,7 @@ export class PhoenixFlameScene extends Scene {
 
     constructor(app: PIXI.Application) {
         super(app);
-        this.tickerCallback = (delta) => this.update(delta);
+        this.tickerCallback = delta => this.update(delta);
         this.initialize();
     }
 
@@ -28,7 +28,10 @@ export class PhoenixFlameScene extends Scene {
         this.particleTexture = this.createParticleTexture();
 
         // Start particle emission
-        this.emitInterval = window.setInterval(() => this.emitParticle(this.particleTexture), this.EMIT_INTERVAL);
+        this.emitInterval = window.setInterval(
+            () => this.emitParticle(this.particleTexture),
+            this.EMIT_INTERVAL
+        );
 
         // Add update loop
         this.app.ticker.add(this.tickerCallback);
@@ -58,7 +61,7 @@ export class PhoenixFlameScene extends Scene {
 
     private createParticleTexture(): PIXI.Texture {
         const graphics = new PIXI.Graphics();
-        graphics.beginFill(0xFFFFFF);
+        graphics.beginFill(0xffffff);
         graphics.drawCircle(0, 0, 50);
         graphics.endFill();
 
@@ -68,17 +71,14 @@ export class PhoenixFlameScene extends Scene {
 
     private initializeParticle(sprite: PIXI.Sprite): { x: number; y: number } {
         // Set position
-        sprite.position.set(
-            this.app.screen.width / 2,
-            this.app.screen.height / 2
-        );
+        sprite.position.set(this.app.screen.width / 2, this.app.screen.height / 2);
 
         // Set velocity with more concentrated upward movement
-        const angle = -Math.PI + (Math.random()) * Math.PI; // Mostly upward with small spread
-        const speed = 1+ Math.random(); // Reduced speed range
+        const angle = -Math.PI + Math.random() * Math.PI; // Mostly upward with small spread
+        const speed = 1 + Math.random(); // Reduced speed range
         const velocity = {
             x: Math.cos(angle) * speed,
-            y: Math.sin(angle) * speed
+            y: Math.sin(angle) * speed,
         };
 
         // Set color
@@ -104,7 +104,7 @@ export class PhoenixFlameScene extends Scene {
             sprite,
             velocity,
             life: 0,
-            maxLife: this.PARTICLE_LIFETIME
+            maxLife: this.PARTICLE_LIFETIME,
         };
 
         this.particles.push(particle);
@@ -148,22 +148,36 @@ export class PhoenixFlameScene extends Scene {
         l /= 100;
 
         const c = (1 - Math.abs(2 * l - 1)) * s;
-        const x = c * (1 - Math.abs((h / 60) % 2 - 1));
-        const m = l - c/2;
-        let r = 0, g = 0, b = 0;
+        const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+        const m = l - c / 2;
+        let r = 0,
+            g = 0,
+            b = 0;
 
         if (0 <= h && h < 60) {
-            r = c; g = x; b = 0;
+            r = c;
+            g = x;
+            b = 0;
         } else if (60 <= h && h < 120) {
-            r = x; g = c; b = 0;
+            r = x;
+            g = c;
+            b = 0;
         } else if (120 <= h && h < 180) {
-            r = 0; g = c; b = x;
+            r = 0;
+            g = c;
+            b = x;
         } else if (180 <= h && h < 240) {
-            r = 0; g = x; b = c;
+            r = 0;
+            g = x;
+            b = c;
         } else if (240 <= h && h < 300) {
-            r = x; g = 0; b = c;
+            r = x;
+            g = 0;
+            b = c;
         } else if (300 <= h && h < 360) {
-            r = c; g = 0; b = x;
+            r = c;
+            g = 0;
+            b = x;
         }
 
         r = Math.round((r + m) * 255);
@@ -172,4 +186,4 @@ export class PhoenixFlameScene extends Scene {
 
         return (r << 16) + (g << 8) + b;
     }
-} 
+}

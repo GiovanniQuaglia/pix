@@ -7,7 +7,7 @@ export class Menu extends PIXI.Container {
     private menuItems: { text: string; scene: string }[] = [
         { text: 'Ace of Shadows', scene: 'ace-of-shadows' },
         { text: 'Magic Words', scene: 'magic-words' },
-        { text: 'Phoenix Flame', scene: 'phoenix-flame' }
+        { text: 'Phoenix Flame', scene: 'phoenix-flame' },
     ];
     private buttons: Button[] = [];
 
@@ -19,17 +19,24 @@ export class Menu extends PIXI.Container {
 
     private createMenuItems(): void {
         this.menuItems.forEach((item, index) => {
-            const button = new Button(this.game.application, item.text, () => this.game.startScene(item.scene), {
-                width: 200,
-                height: 50,
-                backgroundColor: 0xFDADD5,
-                textColor: 0xFFFFFF,
-                fontSize: 24
-            });
+            const button = new Button(
+                this.game.application,
+                item.text,
+                () => this.game.startScene(item.scene),
+                {
+                    width: 200,
+                    height: 50,
+                    backgroundColor: 0xfdadd5,
+                    textColor: 0xffffff,
+                    fontSize: 24,
+                }
+            );
 
             button.position.set(
                 this.game.application.screen.width / 2 - 100, // Center horizontally (half of button width)
-                this.game.application.screen.height / 2 - (this.menuItems.length * 60) / 2 + index * 60 // Center vertically with spacing
+                this.game.application.screen.height / 2 -
+                    (this.menuItems.length * 60) / 2 +
+                    index * 60 // Center vertically with spacing
             );
 
             this.buttons.push(button);
@@ -42,8 +49,10 @@ export class Menu extends PIXI.Container {
         this.buttons.forEach((button, index) => {
             button.position.set(
                 this.game.application.screen.width / 2 - 100,
-                this.game.application.screen.height / 2 - (this.menuItems.length * 60) / 2 + index * 60
+                this.game.application.screen.height / 2 -
+                    (this.menuItems.length * 60) / 2 +
+                    index * 60
             );
         });
     }
-} 
+}

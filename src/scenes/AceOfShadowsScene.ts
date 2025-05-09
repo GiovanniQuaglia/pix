@@ -40,18 +40,18 @@ export class AceOfShadowsScene extends Scene {
             const stack = new PIXI.Container();
             // Set anchor to center
             stack.pivot.set(0, 0);
-            
+
             // Responsive spacing based on screen width
             const isMobile = this.app.screen.width <= 768;
             const cardWidth = isMobile ? 80 : 100;
             const stackSpacing = Math.min(this.app.screen.width * 0.3, 200);
-            
+
             const verticalOffset = (this.NUM_CARDS * this.CARD_OFFSET) / 2;
 
             const startX = this.app.screen.width / 2 - cardWidth;
             stack.position.set(
-                startX + (i * stackSpacing),
-                (this.app.screen.height / 2) - verticalOffset
+                startX + i * stackSpacing,
+                this.app.screen.height / 2 - verticalOffset
             );
             this.stacks.push(stack);
             this.addChild(stack);
@@ -64,7 +64,7 @@ export class AceOfShadowsScene extends Scene {
             const isMobile = this.app.screen.width <= 768;
             card.width = isMobile ? 80 : 100;
             card.height = isMobile ? 120 : 150;
-            card.tint = Math.random() * 0xFFFFFF;
+            card.tint = Math.random() * 0xffffff;
             card.anchor.set(0.5, 0.5);
             card.position.set(0, i * this.CARD_OFFSET);
             this.cards.push(card);
@@ -87,7 +87,10 @@ export class AceOfShadowsScene extends Scene {
         const currentTime = Date.now();
 
         // Check if it's time to start a new animation
-        if (!this.isAnimating && currentTime - this.lastMoveTime >= (this.ANIMATION_DURATION + this.MOVE_INTERVAL)) {
+        if (
+            !this.isAnimating &&
+            currentTime - this.lastMoveTime >= this.ANIMATION_DURATION + this.MOVE_INTERVAL
+        ) {
             this.startNewAnimation();
         }
 
@@ -97,14 +100,15 @@ export class AceOfShadowsScene extends Scene {
             const progress = Math.min(elapsed / this.ANIMATION_DURATION, 1);
 
             // Ease in-out function
-            const easeProgress = progress < 0.5
-                ? 2 * progress * progress
-                : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+            const easeProgress =
+                progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
             // Update card position
             this.currentAnimation.card.position.set(
-                this.currentAnimation.startX + (this.currentAnimation.endX - this.currentAnimation.startX) * easeProgress,
-                this.currentAnimation.startY + (this.currentAnimation.endY - this.currentAnimation.startY) * easeProgress
+                this.currentAnimation.startX +
+                    (this.currentAnimation.endX - this.currentAnimation.startX) * easeProgress,
+                this.currentAnimation.startY +
+                    (this.currentAnimation.endY - this.currentAnimation.startY) * easeProgress
             );
 
             // Check if animation is complete
@@ -128,11 +132,11 @@ export class AceOfShadowsScene extends Scene {
 
         // Store the card's current position before removing it
         const cardWorldPos = topCard.getGlobalPosition();
-        
+
         // Remove from source stack and add to main container
         sourceStack.removeChild(topCard);
         this.addChild(topCard);
-        
+
         // Set the card's position in world coordinates
         topCard.position.set(cardWorldPos.x - this.x, cardWorldPos.y - this.y);
 
@@ -146,7 +150,7 @@ export class AceOfShadowsScene extends Scene {
             startY: topCard.y,
             endX: targetLocalPos.x,
             endY: targetLocalPos.y,
-            startTime: Date.now()
+            startTime: Date.now(),
         };
 
         this.isAnimating = true;
@@ -156,16 +160,19 @@ export class AceOfShadowsScene extends Scene {
     private finishAnimation(): void {
         if (this.currentAnimation) {
             const targetStack = this.movingToSecondStack ? this.stacks[1] : this.stacks[0];
-            
+
             // Remove from main container and add to target stack
             this.removeChild(this.currentAnimation.card);
             targetStack.addChild(this.currentAnimation.card);
-            
+
             // Reset card position relative to target stack
-            this.currentAnimation.card.position.set(0, targetStack.children.length * this.CARD_OFFSET);
-            
+            this.currentAnimation.card.position.set(
+                0,
+                targetStack.children.length * this.CARD_OFFSET
+            );
+
             this.currentAnimation = null;
         }
         this.isAnimating = false;
     }
-} 
+}

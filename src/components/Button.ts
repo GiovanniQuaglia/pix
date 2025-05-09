@@ -5,27 +5,32 @@ export class Button extends PIXI.Container {
     private text: PIXI.Text;
     private readonly padding: number = 20;
 
-    constructor(app: PIXI.Application, text: string, onClick: () => void, options: {
-        width?: number;
-        height?: number;
-        backgroundColor?: number;
-        textColor?: number;
-        fontSize?: number;
-    } = {}) {
+    constructor(
+        app: PIXI.Application,
+        text: string,
+        onClick: () => void,
+        options: {
+            width?: number;
+            height?: number;
+            backgroundColor?: number;
+            textColor?: number;
+            fontSize?: number;
+        } = {}
+    ) {
         super();
 
         // Create text first to measure it
         this.text = new PIXI.Text(text, {
             fontFamily: 'Arial',
             fontSize: options.fontSize || 20,
-            fill: options.textColor || 0xFFFFFF,
-            align: 'center'
+            fill: options.textColor || 0xffffff,
+            align: 'center',
         });
 
         // Create background sprite
         const width = options.width || this.text.width + this.padding * 2;
         const height = options.height || this.text.height + this.padding * 2;
-        
+
         const graphics = new PIXI.Graphics();
         graphics.beginFill(options.backgroundColor || 0x333333);
         graphics.drawRoundedRect(0, 0, width, height, 10);
@@ -47,10 +52,10 @@ export class Button extends PIXI.Container {
 
         // Add hover effect
         this.on('pointerover', () => {
-            this.background.tint = 0xEEEEEE;
+            this.background.tint = 0xeeeeee;
         });
         this.on('pointerout', () => {
-            this.background.tint = 0xFFFFFF;
+            this.background.tint = 0xffffff;
         });
     }
 
@@ -61,4 +66,4 @@ export class Button extends PIXI.Container {
     public setVisible(visible: boolean): void {
         this.visible = visible;
     }
-} 
+}

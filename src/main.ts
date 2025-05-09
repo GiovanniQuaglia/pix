@@ -5,7 +5,7 @@ const app = new PIXI.Application({
     view: document.createElement('canvas'),
     width: window.innerWidth,
     height: window.innerHeight,
-    backgroundColor: 0x86F0DD,
+    backgroundColor: 0x86f0dd,
     resolution: window.devicePixelRatio || 1,
     autoDensity: true,
 });
@@ -17,4 +17,4 @@ window.addEventListener('resize', () => {
 });
 
 const game = new Game(app);
-game.initialize(); 
+game.initialize();
