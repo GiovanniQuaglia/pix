@@ -44,7 +44,7 @@ export class MagicWordsScene extends Scene {
     private dialogueContainer: PIXI.Container;
     private charSprites: PIXI.Text[] = [];
     private readonly CHAR_SPACING = 1;
-    private readonly EMOJI_SPACING = -10;
+    private readonly EMOJI_SPACING = -18;
     private readonly LINE_HEIGHT = 32;
 
     private get maxLineWidth(): number {
@@ -374,7 +374,7 @@ export class MagicWordsScene extends Scene {
 
         while ((match = emojiRegex.exec(text)) !== null) {
             const emojiName = match[1];
-            parsedText += text.slice(lastIndex, match.index) + '  '; // Just add two spaces
+            parsedText += text.slice(lastIndex, match.index) + '    ';
             emojis.push({ name: emojiName, index: parsedText.length - 1 }); // Position at the end of spaces
             lastIndex = match.index + match[0].length;
         }
@@ -490,7 +490,7 @@ export class MagicWordsScene extends Scene {
 
         const sprite = new PIXI.Sprite(emoji.texture);
         const textHeight = 20; // Match font size
-        sprite.scale.set((textHeight / sprite.height) * 1.2);
+        sprite.scale.set((textHeight / sprite.height) * 1.44); // Increased from 1.2 to 1.44 (20% larger)
 
         const lastChar = this.charSprites[this.charSprites.length - 1];
         let x = 0;
