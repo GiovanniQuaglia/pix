@@ -38,4 +38,6 @@ src/
 ## Further improvements
 
 - Eventually create a sprite atlas for the images to improve performance
-- Improve emoji positioning and text newline 
+- I took some time beyond the 24h to polish a bit the app and add some more details, you can find it in the branch `extra-work`, there is also a preview link for it [here](https://pix-git-extra-work-giovanni-quaglias-projects.vercel.app)
+
+The main one is [here](https://pix-git-main-giovanni-quaglias-projects.vercel.app)
