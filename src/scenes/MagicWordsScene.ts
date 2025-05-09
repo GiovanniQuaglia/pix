@@ -46,7 +46,12 @@ export class MagicWordsScene extends Scene {
     private readonly CHAR_SPACING = 1;
     private readonly EMOJI_SPACING = -10;
     private readonly LINE_HEIGHT = 32;
-    private readonly MAX_LINE_WIDTH = 380;
+
+    private get maxLineWidth(): number {
+        return this.app.screen.width <= 768
+            ? this.app.screen.width * 0.95 * 0.9
+            : this.app.screen.width * 0.4 * 0.9;
+    }
 
     constructor(app: PIXI.Application) {
         super(app);
@@ -426,7 +431,7 @@ export class MagicWordsScene extends Scene {
             y = lastChar.y;
 
             // Check if we need to wrap to next line
-            if (x + charText.width > this.MAX_LINE_WIDTH) {
+            if (x + charText.width > this.maxLineWidth) {
                 // If we're in the middle of a word (not a space), move the whole word to the next line
                 if (char !== ' ') {
                     // Store the Y position before removing characters
@@ -496,7 +501,7 @@ export class MagicWordsScene extends Scene {
             y = lastChar.y;
 
             // Check if we need to wrap to next line
-            if (x + sprite.width > this.MAX_LINE_WIDTH) {
+            if (x + sprite.width > this.maxLineWidth) {
                 x = 0;
                 y = lastChar.y + this.LINE_HEIGHT;
             }
