@@ -48,10 +48,7 @@ export class AceOfShadowsScene extends Scene {
             stack.pivot.set(0, 0);
 
             // Responsive spacing based on screen width
-            const isMobile = this.app.screen.width <= 768;
-            const cardWidth = isMobile ? 110 : 100;
             const stackSpacing = Math.min(this.app.screen.width * 0.3, 200);
-
             const verticalOffset = (this.NUM_CARDS * this.CARD_OFFSET) / 2;
 
             // Center the stacks by adjusting the startX calculation
@@ -70,19 +67,19 @@ export class AceOfShadowsScene extends Scene {
         if (!isMobile) {
             const chip50 = new PIXI.Sprite(this.chip50Texture);
             const chip100 = new PIXI.Sprite(this.chip100Texture);
-            
+
             // Position chips on either side of the stacks
             const chipY = this.app.screen.height / 2;
             const chipSpacing = Math.min(this.app.screen.width * 0.6, 300);
-            
+
             chip50.anchor.set(0.5);
             chip50.position.set(this.app.screen.width / 2 - chipSpacing, chipY + 40);
             chip50.scale.set(0.5); // Adjust scale as needed
-            
+
             chip100.anchor.set(0.5);
             chip100.position.set(this.app.screen.width / 2 + chipSpacing, chipY - 50);
             chip100.scale.set(0.5); // Adjust scale as needed
-            
+
             this.addChild(chip50);
             this.addChild(chip100);
         }
