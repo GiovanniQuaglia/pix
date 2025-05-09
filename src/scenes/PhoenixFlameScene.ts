@@ -16,16 +16,35 @@ export class PhoenixFlameScene extends Scene {
     private emitInterval: number | null = null;
     private tickerCallback: (delta: number) => void;
     private particleTexture!: PIXI.Texture;
+    private houseTexture: PIXI.Texture;
+    private sunTexture: PIXI.Texture;
+    private house!: PIXI.Sprite;
 
     constructor(app: PIXI.Application) {
         super(app);
         this.tickerCallback = delta => this.update(delta);
+        this.houseTexture = PIXI.Texture.from('images/house.png');
+        this.sunTexture = PIXI.Texture.from('images/sun.png');
         this.initialize();
     }
 
     private initialize(): void {
         // Create particle texture
         this.particleTexture = this.createParticleTexture();
+
+        // Add house sprite
+        this.house = new PIXI.Sprite(this.houseTexture);
+        this.house.anchor.set(0.5, 1); // Anchor at bottom center
+        this.house.position.set(this.app.screen.width / 2, this.app.screen.height);
+        this.house.scale.set(1); // Doubled from 0.5 to 1
+        this.addChild(this.house);
+
+        // Add sun sprite
+        const sun = new PIXI.Sprite(this.sunTexture);
+        sun.anchor.set(0.5);
+        sun.position.set(this.app.screen.width - 200, 200); // Position in top-right area
+        sun.scale.set(0.8); // Doubled from 0.4 to 0.8
+        this.addChild(sun);
 
         // Start particle emission
         this.emitInterval = window.setInterval(
@@ -70,8 +89,9 @@ export class PhoenixFlameScene extends Scene {
     }
 
     private initializeParticle(sprite: PIXI.Sprite): { x: number; y: number } {
-        // Set position
-        sprite.position.set(this.app.screen.width / 2, this.app.screen.height / 2);
+        // Set position at the top of the house
+        const houseTop = this.house.y - this.house.height;
+        sprite.position.set(this.house.x, houseTop);
 
         // Set velocity with more concentrated upward movement
         const angle = -Math.PI + Math.random() * Math.PI; // Mostly upward with small spread
