@@ -295,9 +295,17 @@ export class MagicWordsScene extends Scene {
             const scale = targetWidth / sprite.width;
             sprite.scale.set(scale);
 
-            // Position the avatar at the bottom center of the screen
+            // Get the avatar's position from the dialogue data
+            const avatarData = this.dialogueData?.avatars.find(a => a.name === speakerName);
+            const position = avatarData?.position || 'left';
+
+            // Position the avatar based on the position property
+            const horizontalOffset = this.app.screen.width * (isMobile ? 0.2 : 0.35);
+            const xPosition =
+                position === 'left' ? horizontalOffset : this.app.screen.width - horizontalOffset;
+
             sprite.position.set(
-                this.app.screen.width / 2, // Center horizontally
+                xPosition,
                 this.app.screen.height // Bottom of screen
             );
             sprite.anchor.set(0.5, 1); // Anchor at bottom center
