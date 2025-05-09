@@ -44,20 +44,20 @@ export class AceOfShadowsScene extends Scene {
         // Create stacks
         for (let i = 0; i < this.NUM_STACKS; i++) {
             const stack = new PIXI.Container();
-            // Set anchor to center
             stack.pivot.set(0, 0);
 
             // Responsive spacing based on screen width
             const stackSpacing = Math.min(this.app.screen.width * 0.3, 200);
             const verticalOffset = (this.NUM_CARDS * this.CARD_OFFSET) / 2;
 
-            // Center the stacks by adjusting the startX calculation
+            // Calculate center position
+            const centerX = this.app.screen.width / 2;
+            const centerY = this.app.screen.height / 2;
 
-            const startX = (this.app.screen.width - stackSpacing) / 2;
-            stack.position.set(
-                startX + i * stackSpacing,
-                this.app.screen.height / 2 - verticalOffset
-            );
+            // Position stacks relative to center
+            const offsetX = (i - (this.NUM_STACKS - 1) / 2) * stackSpacing;
+            stack.position.set(centerX + offsetX, centerY - verticalOffset);
+
             this.stacks.push(stack);
             this.addChild(stack);
         }
@@ -69,16 +69,17 @@ export class AceOfShadowsScene extends Scene {
             const chip100 = new PIXI.Sprite(this.chip100Texture);
 
             // Position chips on either side of the stacks
-            const chipY = this.app.screen.height / 2;
+            const centerX = this.app.screen.width / 2;
+            const centerY = this.app.screen.height / 2;
             const chipSpacing = Math.min(this.app.screen.width * 0.6, 300);
 
             chip50.anchor.set(0.5);
-            chip50.position.set(this.app.screen.width / 2 - chipSpacing, chipY + 40);
-            chip50.scale.set(0.5); // Adjust scale as needed
+            chip50.position.set(centerX - chipSpacing, centerY + 40);
+            chip50.scale.set(0.5);
 
             chip100.anchor.set(0.5);
-            chip100.position.set(this.app.screen.width / 2 + chipSpacing, chipY - 50);
-            chip100.scale.set(0.5); // Adjust scale as needed
+            chip100.position.set(centerX + chipSpacing, centerY - 50);
+            chip100.scale.set(0.5);
 
             this.addChild(chip50);
             this.addChild(chip100);
@@ -105,6 +106,48 @@ export class AceOfShadowsScene extends Scene {
         // Remove ticker listener before destroying
         this.app.ticker.remove(this.tickerCallback);
         super.destroy({ children: true });
+    }
+
+    public handleResize(): void {
+        // Update background
+        const background = this.children[0] as PIXI.Graphics;
+        background.clear();
+        background.beginFill(0x45b27b);
+        background.drawRect(0, 0, this.app.screen.width, this.app.screen.height);
+        background.endFill();
+
+        // Calculate center position
+        const centerX = this.app.screen.width / 2;
+        const centerY = this.app.screen.height / 2;
+
+        // Update stack positions
+        const stackSpacing = Math.min(this.app.screen.width * 0.3, 200);
+        const verticalOffset = (this.NUM_CARDS * this.CARD_OFFSET) / 2;
+
+        // Position stacks relative to center
+        this.stacks.forEach((stack, i) => {
+            const offsetX = (i - (this.NUM_STACKS - 1) / 2) * stackSpacing;
+            stack.position.set(centerX + offsetX, centerY - verticalOffset);
+        });
+
+        // Update card sizes
+        const isMobile = this.app.screen.width <= 768;
+        this.cards.forEach(card => {
+            card.width = isMobile ? 110 : 100;
+            card.height = isMobile ? 170 : 150;
+        });
+
+        // Update chip positions if they exist
+        const chipSpacing = Math.min(this.app.screen.width * 0.6, 300);
+
+        // Find and update chip sprites
+        this.children.forEach(child => {
+            if (child instanceof PIXI.Sprite && child.texture === this.chip50Texture) {
+                child.position.set(centerX - chipSpacing, centerY + 40);
+            } else if (child instanceof PIXI.Sprite && child.texture === this.chip100Texture) {
+                child.position.set(centerX + chipSpacing, centerY - 50);
+            }
+        });
     }
 
     public update(): void {

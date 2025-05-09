@@ -164,4 +164,20 @@ export class PhoenixFlameScene extends Scene {
             particle.sprite.scale.set(newScale);
         }
     }
+
+    public handleResize(): void {
+        // Keep house centered at bottom
+        this.house.position.set(this.app.screen.width / 2, this.app.screen.height);
+
+        // Update sun position
+        const sun = this.children.find(
+            child => child instanceof PIXI.Sprite && child.texture === this.sunTexture
+        );
+        if (sun) {
+            sun.position.set(
+                this.app.screen.width - Math.min(200, this.app.screen.width * 0.2),
+                Math.min(200, this.app.screen.height * 0.2)
+            );
+        }
+    }
 }

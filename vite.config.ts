@@ -10,4 +10,8 @@ export default defineConfig({
   server: {
     host: true,
   },
+  assetsInclude: ['**/*.ttf'],
+  build: {
+    assetsInlineLimit: 0,
+  },
 }); 

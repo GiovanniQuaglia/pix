@@ -38,4 +38,3 @@ src/
 ## Further improvements
 
 - Eventually create a sprite atlas for the images to improve performance
-- Improve emoji positioning and text newline 

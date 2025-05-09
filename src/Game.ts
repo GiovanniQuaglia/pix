@@ -1,3 +1,4 @@
+import '@/styles/fonts.css';
 import * as PIXI from 'pixi.js';
 import { AceOfShadowsScene } from './scenes/AceOfShadowsScene';
 import { MagicWordsScene } from './scenes/MagicWordsScene';
@@ -8,6 +9,7 @@ import { Button } from './components/Button';
 // Define a base scene type
 interface GameScene extends PIXI.Container {
     cleanup?: () => void;
+    handleResize?: () => void;
 }
 
 const UI_CONFIG = {
@@ -23,6 +25,14 @@ const UI_CONFIG = {
         position: { x: 20, y: 20 },
         size: { width: 100, height: 40 },
     },
+    title: {
+        style: new PIXI.TextStyle({
+            fontFamily: 'BowlbyOneSC',
+            fontSize: 72,
+            fill: 0x333333,
+            align: 'center',
+        }),
+    },
 };
 
 export class Game {
@@ -32,6 +42,7 @@ export class Game {
     private backButton: Button;
     private fpsText: PIXI.Text;
     private uiLayer: PIXI.Container;
+    private title: PIXI.Text = new PIXI.Text('');
     private resizeHandler: () => void;
     private scenes: Record<string, () => GameScene> = {
         'ace-of-shadows': () => new AceOfShadowsScene(this.app),
@@ -44,6 +55,17 @@ export class Game {
 
         // Create UI layer
         this.uiLayer = new PIXI.Container();
+
+        // Create title with initial empty text
+        this.title = new PIXI.Text('', UI_CONFIG.title.style);
+        this.title.anchor.set(0.5);
+        this.title.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 200);
+        this.uiLayer.addChild(this.title);
+
+        // Wait for font to load before setting the text
+        document.fonts.ready.then(() => {
+            this.title.text = '3 Tests';
+        });
 
         // Create back button using Button component
         this.backButton = new Button(app, '← Back', () => this.showMenu(), {
@@ -89,6 +111,9 @@ export class Game {
     }
 
     private handleResize(): void {
+        // Update title position
+        this.title.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 150);
+
         // Update FPS counter position
         this.fpsText.position.set(
             this.app.screen.width - UI_CONFIG.fpsCounter.position.x,
@@ -96,7 +121,6 @@ export class Game {
         );
 
         // Update back button position if needed
-        // Currently keeping it fixed at (20, 20) but could be made responsive
         this.backButton.position.set(
             UI_CONFIG.backButton.position.x,
             UI_CONFIG.backButton.position.y
@@ -104,6 +128,11 @@ export class Game {
 
         // Update menu layout if needed
         this.menu.updateLayout?.();
+
+        // Update current scene if it exists
+        if (this.currentScene && typeof this.currentScene.handleResize === 'function') {
+            this.currentScene.handleResize();
+        }
     }
 
     public get application(): PIXI.Application {
@@ -115,10 +144,6 @@ export class Game {
     }
 
     public startScene(sceneName: string): void {
-        if (!this.scenes[sceneName]) {
-            console.error(`Scene "${sceneName}" not found`);
-            return;
-        }
         this.switchScene(sceneName);
     }
 
@@ -142,6 +167,7 @@ export class Game {
 
             this.menu.visible = false;
             this.backButton.setVisible(true);
+            this.title.visible = false;
         } catch (error) {
             console.error(`Error switching to scene "${sceneName}":`, error);
             this.showMenu();
@@ -159,6 +185,7 @@ export class Game {
         }
         this.menu.visible = true;
         this.backButton.setVisible(false);
+        this.title.visible = true;
 
         // Ensure UI layer is always on top
         this.app.stage.setChildIndex(this.uiLayer, this.app.stage.children.length - 1);

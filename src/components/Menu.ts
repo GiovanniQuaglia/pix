@@ -27,7 +27,7 @@ export class Menu extends PIXI.Container {
                     width: 200,
                     height: 50,
                     backgroundColor: 0xfdadd5,
-                    textColor: 0xffffff,
+                    textColor: 0x333333,
                     fontSize: 24,
                 }
             );
